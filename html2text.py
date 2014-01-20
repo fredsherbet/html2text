@@ -45,7 +45,7 @@ ESCAPE_SNOB = 0
 LINKS_EACH_PARAGRAPH = 0
 
 # Wrap long lines at position. 0 for no wrapping. (Requires Python 2.3.)
-BODY_WIDTH = 78
+BODY_WIDTH = 0
 
 # Don't show internal links (href="#local-anchor") -- corresponding link targets
 # won't be visible in the plain text file anyway.
@@ -543,7 +543,7 @@ class HTML2Text(HTMLParser.HTMLParser):
                     nest_count = self.google_nest_count(tag_style)
                 else:
                     nest_count = len(self.list)
-                self.o("  " * nest_count) #TODO: line up <ol><li>s > 9 correctly.
+                self.o("    " * (nest_count - 1)) #TODO: line up <ol><li>s > 9 correctly.
                 if li['name'] == "ul": self.o(self.ul_item_mark + " ")
                 elif li['name'] == "ol":
                     li['num'] += 1
@@ -888,7 +888,15 @@ def main():
                     detect = lambda x: {'encoding': 'utf-8'}
                 encoding = detect(data)['encoding']
     else:
-        data = sys.stdin.read()
+        try:
+            data = ''
+            while True:
+                line = sys.stdin.readline()
+                if line == '':
+                    break
+                data += line
+        except KeyboardInterrupt:
+            pass
 
     data = data.decode(encoding)
     h = HTML2Text(baseurl=baseurl)
@@ -911,4 +919,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(1)
